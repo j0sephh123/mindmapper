@@ -1,21 +1,7 @@
-import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
+import app from "./app";
 
-const app = new Hono();
+const PORT = process.env.PORT || 3000;
 
-app.use("/*", cors());
-
-app.get("/", (c) => {
-  return c.text("Hello World!111");
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-serve(
-  {
-    fetch: app.fetch,
-    port: 3000,
-  },
-  (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
-  }
-);

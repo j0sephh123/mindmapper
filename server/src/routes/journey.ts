@@ -11,6 +11,8 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   const { name } = req.body;
+  console.log(name);
+  
   const journey = await prisma.journey.create({
     data: { name },
   });

@@ -1,23 +1,23 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchJourneys, createJourney, Journey } from "../api/journeys";
+import { QUERY_KEYS } from "../constants/queryKeys";
+import { useInvalidateQueries } from "./useInvalidateQueries";
 
 export const useJourneys = () => {
-  const queryClient = useQueryClient();
+  const { invalidateJourneys } = useInvalidateQueries();
 
   const {
     data: journeys = [],
     isLoading,
     error,
   } = useQuery<Journey[]>({
-    queryKey: ["journeys"],
+    queryKey: [QUERY_KEYS.JOURNEYS],
     queryFn: fetchJourneys,
   });
 
   const { mutate: createJourneyMutation, isPending } = useMutation({
     mutationFn: createJourney,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["journeys"] });
-    },
+    onSuccess: invalidateJourneys,
   });
 
   return {

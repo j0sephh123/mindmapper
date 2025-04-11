@@ -6,6 +6,7 @@ import { RenameJourneyDialog } from "./RenameJourneyDialog";
 import { updateJourney, deleteJourney } from "../api/journeys";
 import { useInvalidateQueries } from "../hooks/useInvalidateQueries";
 import { MoreVertical } from "../icons/MoreVertical";
+import { Link } from "react-router-dom";
 
 interface JourneyListItemProps {
   journey: Journey;
@@ -30,7 +31,12 @@ export function JourneyListItem({ journey }: JourneyListItemProps) {
       <li className="p-4 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 text-gray-200">
         <div className="flex justify-between items-center">
           <div className="flex-1">
-            <span className="font-medium">{journey.name}</span>
+            <Link
+              to={`/journeys/${journey.id}`}
+              className="font-medium hover:text-blue-400"
+            >
+              {journey.name}
+            </Link>
             <span className="text-sm text-gray-400 ml-2">
               {timeAgo(journey.createdAt)}
             </span>

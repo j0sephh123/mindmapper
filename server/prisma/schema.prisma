@@ -8,8 +8,26 @@ datasource db {
 }
 
 model Journey {
-    id        Int      @id @default(autoincrement())
+    id          Int        @id @default(autoincrement())
+    name        String
+    description String?
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    treeNodes   TreeNode[]
+}
+
+model TreeNode {
+    id        String     @id @default(cuid())
     name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    content   String?
+    journeyId Int
+    journey   Journey    @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+    parentId  String?
+    parent    TreeNode?  @relation("NodeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+    children  TreeNode[] @relation("NodeHierarchy")
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+
+    @@index([journeyId])
+    @@index([parentId])
 }

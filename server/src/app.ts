@@ -222,4 +222,96 @@ app.post(`${JOURNEY_API_PREFIX}/:journeyId/tree/nodes`, async (req, res) => {
   }
 });
 
+// --- New DELETE Tree Node Route ---
+// @ts-ignore
+app.delete(
+  `${JOURNEY_API_PREFIX}/:journeyId/tree/nodes/:nodeId`,
+  // @ts-ignore
+  async (req, res) => {
+    const { journeyId, nodeId } = req.params;
+
+    console.log(`DELETE request: Journey ID=${journeyId}, Node ID=${nodeId}`);
+
+    try {
+      const numericJourneyId = Number(journeyId);
+      console.log(
+        `Parsed Journey ID: ${numericJourneyId} (Type: ${typeof numericJourneyId})`
+      );
+
+      if (isNaN(numericJourneyId)) {
+        console.log("Validation failed: Journey ID is NaN");
+        return res.status(400).json({ message: "Invalid Journey ID format" });
+      }
+      if (!nodeId) {
+        console.log("Validation failed: Node ID missing");
+        return res.status(400).json({ message: "Node ID is required" });
+      }
+
+      console.log(`Attempting to find node with ID: ${nodeId}`);
+      const nodeToDelete = await prisma.treeNode.findUnique({
+        where: { id: nodeId },
+      });
+
+      if (!nodeToDelete) {
+        console.log(`Node find result: Not Found (ID: ${nodeId})`);
+        return res.status(404).json({ message: "Node not found" });
+      }
+
+      console.log(
+        `Node find result: Found. Node Journey ID = ${
+          nodeToDelete.journeyId
+        } (Type: ${typeof nodeToDelete.journeyId})`
+      );
+      console.log(
+        `Comparing Node Journey ID (${nodeToDelete.journeyId}) with Request Journey ID (${numericJourneyId})`
+      );
+
+      // Explicitly check types before comparison, just in case
+      if (
+        typeof nodeToDelete.journeyId !== "number" ||
+        typeof numericJourneyId !== "number"
+      ) {
+        console.error(
+          "Type mismatch detected! DB journeyId type:",
+          typeof nodeToDelete.journeyId,
+          "Parsed journeyId type:",
+          typeof numericJourneyId
+        );
+        // Fallback to potentially less strict comparison if types are unexpectedly different, though this indicates a deeper issue
+        // if (String(nodeToDelete.journeyId) !== String(numericJourneyId)) { ... }
+        // For now, let the original strict check proceed, but log the type error
+      }
+
+      if (nodeToDelete.journeyId !== numericJourneyId) {
+        console.log(
+          `Journey ID mismatch: Node's journey (${nodeToDelete.journeyId}) !== Requested journey (${numericJourneyId})`
+        );
+        return res
+          .status(404)
+          .json({ message: "Node not found in this journey" });
+      }
+
+      console.log(`Checks passed. Attempting to delete node ID: ${nodeId}`);
+      await prisma.treeNode.delete({
+        where: { id: nodeId },
+      });
+      console.log(`Node ID: ${nodeId} deleted successfully.`);
+
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error during node deletion process:", error);
+      if (error?.code === "P2025") {
+        console.log(
+          "Error handler caught P2025 (Not Found), though explicit check should have caught it."
+        );
+        res.status(404).json({ message: "Node not found" });
+      } else {
+        res
+          .status(500)
+          .json({ message: "Internal server error during node deletion" });
+      }
+    }
+  }
+);
+
 export default app;

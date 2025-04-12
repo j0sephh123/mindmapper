@@ -12,22 +12,26 @@ import { TreeNodeData } from "../api/journeys"; // Import backend type
 // Remove mockData
 // const mockData: TreeNode[] = [...];
 
-// Define the type for the function to add a node
+// Define the type for the function to add/delete nodes
 type AddNodeHandler = (
   parentId: string | null,
   newNodeData: { name: string; content?: string }
 ) => void;
 
+type DeleteNodeHandler = (nodeId: string) => void; // New type
+
 interface TreeNodeProps {
   node: TreeNodeData; // Use backend type
   level: number;
   onAddNode: AddNodeHandler; // Pass handler down
+  onDeleteNode: DeleteNodeHandler; // Add delete handler prop
 }
 
 const TreeNodeComponent: React.FC<TreeNodeProps> = ({
   node,
   level,
   onAddNode,
+  onDeleteNode,
 }) => {
   const hasChildren = node.children && node.children.length > 0;
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -40,6 +44,12 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({
       // Call the handler passed via props
       onAddNode(node.id, { name: newNodeName });
     }
+  };
+
+  // Handler for the delete button click
+  const handleDeleteClick = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent dialog from opening
+    onDeleteNode(node.id); // Call the handler passed via props
   };
 
   return (
@@ -77,6 +87,13 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({
         >
           +
         </button>
+        <button
+          onClick={handleDeleteClick} // Use the new handler
+          className="text-sm bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex-shrink-0"
+          title="Delete Node"
+        >
+          &times; {/* Use times symbol for delete */}
+        </button>
       </div>
       {hasChildren && (
         <ul className="mt-1 pl-2 border-l border-gray-600">
@@ -86,6 +103,7 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({
               node={child}
               level={level + 1}
               onAddNode={onAddNode}
+              onDeleteNode={onDeleteNode}
             />
           ))}
         </ul>
@@ -97,9 +115,14 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({
 interface TreeProps {
   data: TreeNodeData[]; // Use backend type
   onAddNode: AddNodeHandler;
+  onDeleteNode: DeleteNodeHandler; // Add delete handler prop
 }
 
-export const Tree: React.FC<TreeProps> = ({ data, onAddNode }) => {
+export const Tree: React.FC<TreeProps> = ({
+  data,
+  onAddNode,
+  onDeleteNode,
+}) => {
   // Handler for adding a root node (if needed)
   const handleAddRootNode = () => {
     // Similar logic to handleAddLeaf, but pass null as parentId
@@ -129,6 +152,7 @@ export const Tree: React.FC<TreeProps> = ({ data, onAddNode }) => {
             node={node}
             level={0}
             onAddNode={onAddNode}
+            onDeleteNode={onDeleteNode}
           />
         ))}
       </ul>

@@ -91,3 +91,21 @@ export const addTreeNode = async (
   }
   return res.json();
 };
+
+// Delete a specific tree node
+export const deleteTreeNode = async (
+  journeyId: number,
+  nodeId: string
+): Promise<void> => {
+  const res = await fetch(`${API_URL}/${journeyId}/tree/nodes/${nodeId}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok && res.status !== 204) {
+    // Allow 204 No Content as success
+    // Handle errors, e.g., node not found (404)
+    const errorData = await res.json().catch(() => ({})); // Try to parse error JSON
+    throw new Error(errorData.message || "Failed to delete tree node");
+  }
+  // No need to return anything on successful delete (or 204)
+};

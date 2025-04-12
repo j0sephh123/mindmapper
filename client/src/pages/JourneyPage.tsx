@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchJourneys, Journey } from "../api/journeys";
 import { QUERY_KEYS } from "../constants/queryKeys";
+import { MockTree } from "../components/Tree";
 
 export function JourneyPage() {
   const { id } = useParams();
@@ -18,7 +19,8 @@ export function JourneyPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-8">
-      <h1 className="text-3xl font-bold text-gray-200">{journey.name}</h1>
+      <h1 className="text-3xl font-bold text-gray-200 mb-4">{journey.name}</h1>
+      <MockTree />
     </div>
   );
 }
